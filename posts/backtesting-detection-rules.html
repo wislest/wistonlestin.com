@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Backtesting detection rules — including the ones for AI attacks</title>
+  <meta name="description" content="A lottery-prediction backtester repointed at Sigma rules, and two findings from real public data — one classic, one AI.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/">Wiston <span class="dot">Lestin</span></a>
+      <span class="tag">Detection engineering &amp; AI security</span>
+      <nav>
+        <a href="/writing.html">← Writing</a>
+        <a href="/projects.html">Projects</a>
+        <a href="/about.html">About</a>
+        <a href="https://github.com/wislest">GitHub</a>
+        <a href="https://www.linkedin.com/in/wiston-lestin">LinkedIn</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article class="wrap">
+      <h1>Backtesting detection rules — including the ones for AI attacks</h1>
+      <p class="lede">How a lottery-prediction backtester became a harness for measuring detection rules, and two things it revealed on real public data.</p>
+      <p class="meta mono">2026-07-07<span class="sep">·</span><a href="/about.html">Wiston Lestin</a><span class="sep">·</span>~7 min</p>
+
+      <h2>The premise</h2>
+      <p>Detection engineers write rules — Sigma, KQL analytics, the newer <a href="https://github.com/Agent-Threat-Rule/agent-threat-rules">Agent Threat Rules</a> for AI agents — but the feedback loop is weak. You ship a rule and find out how good it was from production noise, weeks later. The question you actually want answered before shipping is simple: <em>against my historical data, how many real attacks does this rule catch, and how much noise does it make?</em></p>
+      <p>That is a backtest. And the machinery for it is the same machinery you'd build to backtest a market strategy, or — in my case — a lottery predictor. Yes, I once built a system to predict lottery numbers. No, it doesn't work, and I know that precisely because I made the harness prove it: every model run against a pure-random baseline over ten thousand simulations, with a chi-square test to catch any edge over chance. None of them had one. That could have been the end of the project. Instead it was the useful part: the harness around those useless models was solid. Replay history, score each predictor, rank them, weight an ensemble, track drift, all of it spent on a coin flip. So I lifted the harness out, threw away the models, and rewrote the scoring core as a confusion matrix. The result is the <a href="https://github.com/wislest/detection-rule-backtester">Detection Rule Backtester</a>.</p>
+      <p>A rule becomes a binary classifier over events:</p>
+      <pre><code>predicted positive := the rule fired on the event
+actual positive    := the event is part of an attack (ground-truth label)</code></pre>
+      <p>From there you get precision, recall, F1 and false-positive rate per rule, rankings, and a multi-rule ensemble confidence. Two tracks share one harness: classic logs (Sysmon/EVTX) and AI-attack traces (LLM prompts, agent tool calls). Below are two findings from running it on real public data — one from each track — because a harness is only interesting if it tells you something you didn't already know.</p>
+
+      <h2>Finding 1 (classic logs): a rule can be right and still blind</h2>
+      <p>I ran two Sigma rules against a real <a href="https://github.com/OTRF/Security-Datasets">OTRF Security-Datasets</a> capture — an Empire launcher that uses <code>regsvr32</code> to pull a remote <code>.sct</code> scriptlet (Squiblydoo, <code>T1218.010</code>) which spawns an encoded-PowerShell agent (<code>T1059.001</code>) beaconing to a C2. 2,390 events. Since these captures don't ship per-event labels, I anchored ground truth on the attack's IOCs — the C2 address and the <code>regsvr32 → powershell</code> process lineage — deliberately <em>independent</em> of the process patterns the rules test, to avoid grading the rules on their own answer key.</p>
+      <p>Both rules fired at precision 1.0, which looked fine until I checked the Squiblydoo rule's recall: 0.5. It had caught the attack once and missed it once, and that stopped me for a minute, because there was only one attack to catch. The answer was that the same process creation gets logged twice — once by Sysmon (EventID 1) and once by Windows Security (EventID 4688). The rule keys on <code>Image</code>, a Sysmon field name; the 4688 record carries the identical data under <code>NewProcessName</code>. Same event, different schema, and a rule written against one schema is blind to the other.</p>
+      <p>The fix is not cleverer regex — it's <strong>field normalization</strong>, the same idea as Sigma processing pipelines or the OSSEM data dictionary. Map the Security field names onto the Sysmon names before evaluating:</p>
+      <pre><code>events = load_sysmon_events(capture, normalize=True)   # 4688 gains Image/ParentImage</code></pre>
+      <p>Scoped recall goes from 0.5 to 1.0. The harness printed both runs side by side, and that is what I wanted from it: not just a score, but a hint at where the rule was losing ground, and a way to confirm the fix actually moved the number.</p>
+
+      <h2>Finding 2 (AI attacks): keyword rules barely dent real jailbreaks</h2>
+      <p>For AI attacks I replayed 666 <a href="https://github.com/NVIDIA/garak">in-the-wild jailbreak prompts</a> shipped with NVIDIA's garak, plus a few named DAN / Developer-Mode payloads, mixed with benign prompts so precision and false-positive rate mean something.</p>
+      <p>A classic prompt-injection rule keyed on instruction-override phrasing — <em>"ignore previous instructions", "developer mode", "reveal your system prompt"</em> — caught <strong>8.8% (59/669)</strong>, at precision 1.0. The low number is the interesting part. When I counted markers across the corpus, literal override phrasing turned out to be rare: "ignore/disregard previous" appears in 6.5% of prompts, "developer mode" in 3.6%. Real jailbreaks are dominated by <em>role-play framing</em> — "you are now", "act as", "pretend to be" — at 42.6%, and <em>restriction-removal</em> framing — "no restrictions", "unfiltered" — at 33.2%.</p>
+      <p>So I added three more rule families for exactly those patterns and let the harness rank them and vote. <strong>Ensemble recall rose to <span class="kpi">70.4% (471/669)</span></strong>, still with zero false alarms on the benign set. The ranking the harness produced:</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th class="num">Rank</th><th>Rule family</th><th class="num">Ensemble weight</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>Role-play / persona framing</td><td class="num">0.40</td></tr>
+          <tr><td class="num">2</td><td>Restriction-removal framing</td><td class="num">0.30</td></tr>
+          <tr><td class="num">3</td><td>DAN persona</td><td class="num">0.20</td></tr>
+          <tr><td class="num">4</td><td>Instruction-override keywords</td><td class="num">0.10</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>The override-keyword rule, the one most people reach for first, ranks last. And even all four families together leave about 30% of real jailbreaks uncaught. That residual is the honest argument for semantic detection: keyword and regex rules are a cheap first layer with a hard ceiling, and now I can point to where the ceiling sits instead of just asserting there is one.</p>
+
+      <h2>Why this shape matters</h2>
+      <p>Neither finding is exotic. What's useful is that both came out of the <em>same</em> measurement loop, and the loop is honest about its own limits: the Sigma evaluator ignores <code>logsource</code> (so pre-filter by source), scoped recall depends on rule and corpus taxonomies agreeing, and IOC-based labels are approximate. Those caveats are in the README, not hidden, because a backtester that flatters your rules is worse than none.</p>
+      <p>The through-line from a dead lottery project turned out to be simple: the value was never in the models, it was in the harness that measured them. Repointed at detection rules, classic and AI-facing alike, it finally has something worth measuring.</p>
+
+      <hr>
+      <p class="meta">Code, rules and reproducible runs: <a href="https://github.com/wislest/detection-rule-backtester">github.com/wislest/detection-rule-backtester</a>. Every number above regenerates from <code>examples/run_real_dataset.py</code> and <code>examples/run_real_garak.py</code> after <code>bash scripts/fetch_datasets.sh</code>.</p>
+    </article>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>Wiston Lestin — Detection &amp; Response · Detection-as-Code &amp; AI security.</span>
+      <span class="sep">·</span>
+      <a href="https://wiston.secureorbit.cloud">Portfolio</a>
+      <span class="sep">·</span>
+      <a href="https://github.com/wislest">GitHub</a>
+      <span class="sep">·</span>
+      <a href="https://www.linkedin.com/in/wiston-lestin">LinkedIn</a>
+    </div>
+  </footer>
+</body>
+</html>

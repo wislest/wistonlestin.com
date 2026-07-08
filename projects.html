@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects — Wiston Lestin</title>
+  <meta name="description" content="Open-source security tools and platforms built by Wiston Lestin — detection-as-code, AI security, and threat detection.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="/">Wiston <span class="dot">Lestin</span></a>
+      <span class="tag">Detection engineering &amp; AI security</span>
+      <nav>
+        <a href="/writing.html">Writing</a>
+        <a href="/projects.html">Projects</a>
+        <a href="/about.html">About</a>
+        <a href="https://github.com/wislest">GitHub</a>
+        <a href="https://www.linkedin.com/in/wiston-lestin">LinkedIn</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <h1>Projects</h1>
+      <p class="lede">Tools and platforms I've built — mostly open source, focused on detection-as-code and the security of AI systems.</p>
+
+      <p class="section-label">Tools &amp; platforms</p>
+      <div class="grid two">
+        <article class="card flat">
+          <h3>Detection Rule Backtester</h3>
+          <p class="excerpt">Backtest detection rules (Sigma / ATR / KQL-style) against real logs and AI-attack traces — per-rule precision, recall and false-positive rate plus multi-rule ensemble confidence.</p>
+          <p class="tech mono">Python · Sigma · garak · MITRE ATT&amp;CK / ATLAS · MIT</p>
+          <p class="links">
+            <a href="https://github.com/wislest/detection-rule-backtester">GitHub →</a>
+            <a href="/posts/backtesting-detection-rules.html">Write-up →</a>
+          </p>
+        </article>
+
+        <article class="card flat">
+          <h3>DefenderHunter</h3>
+          <p class="excerpt">Detection-as-code threat-hunting framework for Microsoft Defender XDR &amp; Sentinel — MITRE-mapped ransomware query packs with automated IOC enrichment.</p>
+          <p class="tech mono">PowerShell · KQL · Defender XDR · Sentinel · MIT</p>
+          <p class="links"><a href="https://github.com/wislest/DefenderHunting">GitHub →</a></p>
+        </article>
+
+        <article class="card flat">
+          <h3>Sandbox Malware Analyzer</h3>
+          <p class="excerpt">Disposable, automated malware-analysis lab on Windows Sandbox — multi-format detonation, behavioral capture, IOC extraction and HTML/JSON reporting.</p>
+          <p class="tech mono">PowerShell · Windows Sandbox · YARA · MIT</p>
+          <p class="links"><a href="https://github.com/wislest/sandbox-malware-analyzer">GitHub →</a></p>
+        </article>
+
+        <article class="card flat">
+          <h3>SecureOrbit EASM</h3>
+          <p class="excerpt">External Attack Surface Management — continuous discovery and monitoring of internet-facing assets, with correlation and confidence scoring to prioritize real exposures. Includes CertWatch, a TLS-certificate monitoring SaaS.</p>
+          <p class="tech mono">Python · Docker · REST APIs · alerting</p>
+          <p class="links"><a href="https://secureorbit.cloud">SecureOrbit →</a></p>
+        </article>
+      </div>
+
+      <p class="meta" style="margin-top:24px">Everything here is my own work. More — including forks and study material I keep for reference — on <a href="https://github.com/wislest">GitHub</a>.</p>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>Wiston Lestin — Detection &amp; Response · Detection-as-Code &amp; AI security.</span>
+      <span class="sep">·</span>
+      <a href="https://github.com/wislest">GitHub</a>
+      <span class="sep">·</span>
+      <a href="https://www.linkedin.com/in/wiston-lestin">LinkedIn</a>
+    </div>
+  </footer>
+</body>
+</html>

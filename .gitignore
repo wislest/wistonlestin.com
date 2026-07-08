@@ -1,0 +1,9 @@
+# Local tunnel/docker serving method — not used by Cloudflare Pages
+nginx.conf
+docker-compose.yml
+deploy-*.sh
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
