@@ -160,7 +160,7 @@ hr { border: none; border-top: 1px dashed var(--dash); margin: 40px 0; }
 
 /* ------------------------------------------------------------------ footer */
 footer.site { border-top: 1px solid var(--line); color: var(--faint); font-size: 13px; margin-top: 20px; }
-footer.site .wrap { padding: 28px 22px 56px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+footer.site .wrap { padding: 28px 22px 140px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 footer.site a { color: var(--muted); }
 footer.site a:hover { color: var(--accent-soft); }
 footer.site .sep { opacity: .45; margin: 0 8px; }
