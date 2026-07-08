@@ -160,7 +160,7 @@ hr { border: none; border-top: 1px dashed var(--dash); margin: 40px 0; }
 
 /* ------------------------------------------------------------------ footer */
 footer.site { border-top: 1px solid var(--line); color: var(--faint); font-size: 13px; margin-top: 20px; }
-footer.site .wrap { padding: 26px 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+footer.site .wrap { padding: 28px 22px 56px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 footer.site a { color: var(--muted); }
 footer.site a:hover { color: var(--accent-soft); }
 footer.site .sep { opacity: .45; margin: 0 8px; }
@@ -216,7 +216,7 @@ footer.site .sep { opacity: .45; margin: 0 8px; }
 }
 .lang-btn:hover { color: var(--accent); border-color: var(--accent); }
 
-.contact-center { text-align: center; padding: 54px 0 46px; }
+.contact-center { text-align: center; padding: 54px 0 72px; }
 .contact-center h2 { margin: 0 0 14px; }
 .contact-center p { margin: 0 auto 10px; max-width: 58ch; color: var(--muted); }
 .contact-center .btns { justify-content: center; margin-top: 26px; }
