@@ -44,6 +44,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 .wrap { max-width: 760px; margin: 0 auto; padding: 0 22px; }
+.wrap.wide { max-width: 1160px; }
 .mono { font-family: var(--mono); }
 ::selection { background: var(--accent); color: #101010; }
 
@@ -94,6 +95,7 @@ main { padding: 46px 0 72px; }
 .grid { display: grid; gap: 14px; margin: 16px 0; }
 .grid.two { grid-template-columns: repeat(2, 1fr); }
 .grid.three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 1023px) { .grid.three { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .grid.two, .grid.three { grid-template-columns: 1fr; } }
 
 .card {
@@ -219,5 +221,13 @@ footer.site .sep { opacity: .45; margin: 0 8px; }
 /* signature dashed rhythm between portfolio sections */
 main section + section { border-top: 1px dashed var(--dash); margin-top: 44px; padding-top: 6px; }
 main section.hero + section, section.hero { border-top: none; }
+
+/* wide container (portfolio pages): full-width bands, capped line lengths */
+.wrap.wide .hero p { max-width: 64ch; }
+.wrap.wide .headshot { width: 190px; height: 190px; }
+.wrap.wide section p { max-width: 76ch; }
+.wrap.wide .xp ul { max-width: 920px; }
+.wrap.wide .contact-center p { margin-left: auto; margin-right: auto; }
+@media (max-width: 640px) { .wrap.wide .headshot { width: 112px; height: 112px; } }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto; } }
