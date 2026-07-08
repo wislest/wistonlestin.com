@@ -1,0 +1,11 @@
+// Cloudflare Workers — static assets only (no worker script, no build step).
+// Deploy: dashboard "Connect GitHub" → this repo, or `npx wrangler deploy`.
+{
+  "name": "wistonlestin-com",
+  "compatibility_date": "2026-07-08",
+  "assets": {
+    "directory": "./",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
