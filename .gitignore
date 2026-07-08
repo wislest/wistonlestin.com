@@ -2,6 +2,7 @@
 nginx.conf
 docker-compose.yml
 deploy-*.sh
+decommission-*.sh
 
 # OS / editor
 .DS_Store
