@@ -45,6 +45,15 @@ body {
 }
 .wrap { max-width: 760px; margin: 0 auto; padding: 0 22px; }
 .wrap.wide { max-width: 1160px; }
+.wrap.reading { max-width: 880px; }
+
+/* professional text setting: justified with hyphenation on prose pages */
+.reading p:not(.lede):not(.meta):not(.footnote) {
+  text-align: justify; text-justify: inter-word;
+  hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word;
+}
+.wrap.wide section p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.wrap.wide .contact-center p { text-align: center; hyphens: none; }
 .mono { font-family: var(--mono); }
 ::selection { background: var(--accent); color: #101010; }
 
