@@ -106,7 +106,7 @@ main { padding: 46px 0 72px; }
 }
 .eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--accent); opacity: .8; }
 .hero .role { font-size: clamp(17px, 2.3vw, 20px); font-weight: 500; color: var(--muted); margin: 0 0 18px; letter-spacing: -.2px; }
-.hero p:last-child { color: var(--muted); max-width: 62ch; }
+.hero p:last-child { color: var(--muted); }
 
 /* ------------------------------------------------------------------ grids + cards */
 .grid { display: grid; gap: 14px; margin: 16px 0; }
@@ -282,8 +282,8 @@ section[id] { scroll-margin-top: 76px; }
 main section + section { border-top: 1px dashed var(--dash); margin-top: 44px; padding-top: 6px; }
 main section.hero + section, section.hero { border-top: none; }
 
-/* wide container (portfolio pages): full-width bands, capped line lengths */
-.wrap.wide .hero p { max-width: 64ch; }
+/* wide container (portfolio pages): full-width bands */
+.wrap.wide .hero p { max-width: none; hyphens: none; -webkit-hyphens: none; }
 .wrap.wide .headshot { width: 190px; height: 190px; }
 .wrap.wide section p { max-width: 76ch; }
 .wrap.wide .xp ul { max-width: 920px; }
