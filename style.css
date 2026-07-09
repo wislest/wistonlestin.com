@@ -141,7 +141,10 @@ a.card:hover, .card:hover {
 .section-label::before { content: ""; width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
 
 /* ------------------------------------------------------------------ article */
-.lede { color: var(--muted); font-size: 18px; line-height: 1.6; margin: 0 0 22px; }
+.lede {
+  color: var(--muted); font-size: 18px; line-height: 1.6; margin: 0 0 22px;
+  text-align: justify; hyphens: none; -webkit-hyphens: none;
+}
 .meta { color: var(--faint); font-size: 13px; font-family: var(--mono); line-height: 1.9; margin: 0 0 32px; }
 .meta a { color: var(--muted); }
 .meta .sep { opacity: .5; margin: 0 9px; }
