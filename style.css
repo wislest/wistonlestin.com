@@ -125,17 +125,20 @@ a.card:hover, .card:hover {
 
 /* ------------------------------------------------------------------ article */
 .lede { color: var(--muted); font-size: 18px; line-height: 1.6; margin: 0 0 22px; }
-.meta { color: var(--faint); font-size: 13px; font-family: var(--mono); margin: 0 0 32px; }
+.meta { color: var(--faint); font-size: 13px; font-family: var(--mono); line-height: 1.9; margin: 0 0 32px; }
 .meta a { color: var(--muted); }
 .meta .sep { opacity: .5; margin: 0 9px; }
-article p, main > .wrap > p { max-width: 66ch; }
+/* the 760px container is already a reading measure — let text align with headings */
+.footnote { color: var(--faint); font-size: 13.5px; line-height: 1.8; }
+.footnote a { color: var(--muted); }
+.footnote a:hover { color: var(--accent-soft); }
 article a { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent-deep) 55%, transparent); text-underline-offset: 3px; }
 article a:hover { text-decoration-color: var(--accent); }
 
 code {
   font-family: var(--mono); font-size: .85em;
   background: var(--bg-2);
-  color: #f5f6f7; padding: 2px 7px; border-radius: 6px;
+  color: #f5f6f7; padding: 1px 6px; border-radius: 5px;
 }
 pre {
   background: var(--code-bg); color: #f5f6f7; border: 1px solid var(--line);
