@@ -7,3 +7,5 @@ deploy-blog-tunnel.sh
 deploy-wistonlestin-tunnel.sh
 .gitignore
 DESIGN.md
+syndication
+tools

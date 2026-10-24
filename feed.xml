@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Wiston Lestin — Detection engineering &amp; AI security</title>
+    <link>https://wistonlestin.com/</link>
+    <description>Detection engineering, detection-as-code and AI security. Lab write-ups and field notes.</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 24 Oct 2026 12:00:00 +0000</lastBuildDate>
+    <atom:link href="https://wistonlestin.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>In March, TLS certificates drop to 100 days. The ones nobody owns are what break.</title>
+      <link>https://wistonlestin.com/posts/certificates-100-days-march-2027</link>
+      <guid isPermaLink="true">https://wistonlestin.com/posts/certificates-100-days-march-2027</guid>
+      <pubDate>Sat, 24 Oct 2026 12:00:00 +0000</pubDate>
+      <description>The CA/Browser Forum schedule is fixed: 100-day maximum certificate lifetime from 15 March 2027. The failure mode isn&#x27;t your main domain — it&#x27;s the certificate whose owner left the company.</description>
+      <content:encoded><![CDATA[<h2>The schedule</h2>
+      <p>In April 2025 the CA/Browser Forum passed ballot SC-081v3, which sets a staged reduction in how long a publicly trusted TLS certificate may live. It is not a proposal and it is not vendor marketing: it sits in the TLS Baseline Requirements, section 6.3.2, with dates attached.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>From</th><th>Maximum certificate lifetime</th><th>Domain validation reuse</th></tr></thead>
+          <tbody>
+            <tr><td>2020</td><td>398 days</td><td>398 days</td></tr>
+            <tr><td>15 March 2026</td><td>200 days <em>(in force)</em></td><td>200 days</td></tr>
+            <tr><td><strong>15 March 2027</strong></td><td><strong>100 days</strong></td><td><strong>100 days</strong></td></tr>
+            <tr><td>15 March 2029</td><td>47 days</td><td>10 days</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Each date applies to certificates issued from that day forward. Anything already issued keeps running until its own expiry, so the change arrives gradually rather than as a cliff. Some CAs shave a day off to stay safely inside the ceiling — DigiCert issues 199 rather than 200, and will issue 99 rather than 100.</p>
+      <p>Most of the writing about this fixates on the 47-day number. That one lands in 2029 and nobody is going to act on it today. The date worth a calendar entry is <strong>15 March 2027</strong>, which is about five months away.</p>
+
+      <h2>What actually changes</h2>
+      <p>At 200 days you renew roughly twice a year. At 100 days you renew roughly four times. If renewal is automated, that is a configuration detail and you will barely notice. If any part of it is manual — a person who generates a CSR, emails it, waits for the signed certificate, and installs it on a box — you have doubled the number of times that person has to not be on vacation.</p>
+      <p>The domain validation reuse window halves on the same date. Teams who batch their revalidation once or twice a year will be doing it four times, and the reuse period stops covering the gap between renewals the way it used to.</p>
+
+      <h2>The failure mode is not the certificate you're thinking of</h2>
+      <p>Ask an IT lead which certificates they have and you usually get the right answer for the main site, the API, and the mail gateway. Those are automated, monitored, or at least remembered. They are not what takes a service down at 2 a.m.</p>
+      <p>What takes the service down is the long tail:</p>
+      <ul>
+        <li>a subdomain stood up for a campaign that ended, still resolving, still serving</li>
+        <li>an appliance or load balancer with a certificate installed by hand, outside whatever ACME client covers the web tier</li>
+        <li>an internal tool that got a publicly trusted certificate because it was easier at the time</li>
+        <li>a certificate issued by a team, a contractor, or an employee who is no longer there, and whose renewal nobody inherited</li>
+      </ul>
+      <p>Shorter lifetimes don't create these. They surface them, four times a year instead of once, and with less slack each time. A certificate that was quietly going to break in 2027 now gets three more chances to break first.</p>
+      <p>The useful property here is that these certificates are not actually hidden. Every publicly trusted certificate issued since 2018 is written to <strong>certificate transparency logs</strong>, which are append-only and public by design. The forgotten subdomain is discoverable from the outside, by you or by anyone else. The organisations that get caught are not the ones with no record — they are the ones who never went and read it.</p>
+
+      <h2>What I would do before March</h2>
+      <p><strong>1. Inventory from the outside, not from the spreadsheet.</strong> Pull your organisation's certificates out of CT logs and compare that list against what your team believes it runs. The delta is the interesting part, and it is usually not empty.</p>
+      <p><strong>2. Put a name against every renewal.</strong> Not a team, a person. "Platform owns it" is how a certificate ends up owned by nobody after a reorg.</p>
+      <p><strong>3. Automate what ACME can reach.</strong> Web tier, CDN, reverse proxies, most cloud load balancers. This is solved work and there is no reason to carry it by hand into a 100-day cadence.</p>
+      <p><strong>4. Monitor what it can't.</strong> Automation is not universal: network appliances, some vendor-managed platforms, anything where a certificate is installed through a vendor console or pinned by a client. Those stay manual for the foreseeable future, which means the only thing standing between them and an outage is somebody noticing in time.</p>
+      <p><strong>5. Rehearse now, while the window is still 200 days.</strong> A renewal process you have run twice under no pressure is a different thing from one you first exercise in March.</p>
+
+      <h2>Why I care about this one</h2>
+      <p>Most of what I write here is about detection: whether a rule fires, whether a metric means anything, whether a system can be proven to work. Certificate expiry sits in the same family and gets far less attention, because it isn't an attack. It is the <em>silent</em> failure — nothing is compromised, nobody is breached, and the service is simply down, with a browser warning in front of every customer and a clock that was visible the whole time.</p>
+      <p>That is the part I find hard to leave alone. The information was public, dated, and machine-readable. The outage still happened because nobody was reading it.</p>
+
+      <hr>
+      <p class="footnote">Sources: CA/Browser Forum ballot SC-081v3 (passed 11 April 2025) and the <a href="https://cabforum.org/working-groups/server/baseline-requirements/documents/">TLS Baseline Requirements</a>, sections 6.3.2 and 4.2.1. I also build <a href="https://secureorbit.cloud/">CertWatch</a>, a managed certificate monitoring service, which is where my interest in the long tail comes from — it runs a <a href="https://secureorbit.cloud/scan.html?request_type=free_scan">free scan</a> that reads your CT-log history and tells you what is expiring, whether or not you ever become a customer.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>My detection models score 100% on everything. That&#x27;s a red flag, not a feature.</title>
+      <link>https://wistonlestin.com/posts/lab-metrics-red-flag</link>
+      <guid isPermaLink="true">https://wistonlestin.com/posts/lab-metrics-red-flag</guid>
+      <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+      <description>A weekend detection lab with perfect metrics on every row — and why the most honest number on the dashboard was a 0.0%.</description>
+      <content:encoded><![CDATA[<h2>The setup</h2>
+      <p>Last weekend I built a small multi-domain detection lab: network flows, phishing URLs, identity anomalies, malware memory metadata, and LLM prompt abuse. Same origin story as the <a href="https://wistonlestin.com/posts/backtesting-detection-rules.html">detection rule backtester</a> — scaffolding recycled from a dead lottery-prediction project — but this time pointed at the other half of the problem: not measuring rules, but running a scoring pipeline end to end. Events come in, models score them, anything above a 0.55 risk threshold opens an alert. A mini-SOC in a box, labelled LAB/DEMO on every page.</p>
+      <p>I trained the whole zoo — heuristic rules, random forests, a TF-IDF text classifier, voting ensembles; sixteen models across the five domains — and opened the metrics tab. Here is what it showed:</p>
+      <p><strong>F1: 100%. Precision: 100%. Recall: 100%. False-positive rate: 0%.</strong> On nearly every row.</p>
+      <p>If I were selling this, that screenshot would be the pitch deck. Since what I actually care about is <em>evaluating</em> detection systems, my reaction was the opposite: something is wrong. A perfect detector doesn't exist. A detector that <em>believes</em> it's perfect is a detector nobody has seriously evaluated yet.</p>
+
+      <h2>Where the 100% comes from</h2>
+      <p>The models are trained and evaluated on <strong>synthetic fixtures</strong>: two hundred events per domain, generated by my own code. The "injection" prompts contain phrases like <em>ignore all previous instructions</em>; the benign ones are ordinary questions. The phishing URLs have raw IPs and shady TLDs; the clean ones don't. The malicious network flows are loud; the normal ones are quiet.</p>
+      <p>In other words: <strong>I wrote an exam where the questions are the answers.</strong> The two classes are separable by construction. Any model — a single regex — scores 100% on this data. The metric isn't measuring the quality of the detector; it's measuring the naivety of the dataset.</p>
+      <p>That's the first reflex worth building in front of any detection metric: <em>ask what it was measured on before asking how high it is.</em> A vendor quoting "99.9% detection" without describing the evaluation set has told you literally nothing. My dashboard is that vendor slide, self-hosted.</p>
+
+      <h2>The row that gives the game away: 0.0%</h2>
+      <p>The most instructive number in the table isn't any of the 100%s. It's one row showing <strong>0.0% across every column</strong>: the network domain's anomaly detector, an Isolation Forest.</p>
+      <p>Why zero? Because an Isolation Forest is <strong>unsupervised</strong> — it doesn't predict "attack / benign", it assigns an outlier score. My evaluation pipeline computes precision and recall as if every model were a supervised classifier. Supervised metrics applied to a model that isn't playing that game produce meaningless zeros — printed with exactly the same confidence as the perfect scores two rows up.</p>
+      <p>The lesson travels beyond my lab: <strong>a dashboard prints numbers, not truths.</strong> If the evaluation harness is wired wrong, it produces numbers anyway. The 100%s and the 0.0% on my screen have the same root cause — an evaluation that wasn't designed with the same seriousness as the system it measures.</p>
+
+      <h2>What honest evaluation looks like</h2>
+      <p>Turning this lab into something defensible is the point of the next posts. The plan:</p>
+      <p><strong>1. Real, public data.</strong> Re-evaluate on recognized benchmarks — CIC-IDS2017 and UNSW-NB15 for network, CIC-MalMem-2022 for malware, public jailbreak corpora for the LLM domain. Prediction: the metrics will fall off a cliff, and the number <em>after</em> the fall is the one worth publishing.</p>
+      <p><strong>2. Adversarial pressure.</strong> A prompt-injection detector that recognizes "ignore all previous instructions" verbatim — what does it do against a paraphrase, a base64 wrapper, an indirect injection? Measure a <em>bypass rate</em>, not just an F1. The backtester post already put a floor under this: keyword rules caught <a href="https://wistonlestin.com/posts/backtesting-detection-rules.html">8.8% of real in-the-wild jailbreaks</a>, and a tuned ensemble still left 30% through.</p>
+      <p><strong>3. False positives at the operating threshold.</strong> My system opens an alert at a score of 0.55. The metric a SOC team lives with isn't an abstract ROC-AUC — it's <em>how many false alerts per day at that exact threshold</em>. Alert fatigue kills more detection programs than missed attacks do.</p>
+      <p><strong>4. Evaluate the evaluator.</strong> Check that every model type is scored with metrics that make sense for it. My Isolation Forest row is what skipping that step looks like.</p>
+
+      <h2>Why I'm leaving the dashboard up</h2>
+      <p>Companies are wiring LLMs into everything and buying "prompt firewalls" on the strength of demos. The rare skill in 2026 isn't training a classifier — it's being able to <strong>prove what a detection system is actually worth</strong>, and being honest about what it isn't. This lab is my public training ground for exactly that.</p>
+      <p>So the 100% table stays, banner attached: <em>demo metrics ≠ production performance</em>. Next post, I feed it real data — and we watch together how far it drops.</p>
+
+      <hr>
+      <p class="footnote">The lab (Cyber-XWin) is a personal LAB/DEMO project — five detection domains, FastAPI + scikit-learn, dry-run prevention by default. It is deliberately not a product; it's the system under test for the <a href="https://github.com/wislest/detection-rule-backtester">detection rule backtester</a>.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Backtesting detection rules — including the ones for AI attacks</title>
+      <link>https://wistonlestin.com/posts/backtesting-detection-rules</link>
+      <guid isPermaLink="true">https://wistonlestin.com/posts/backtesting-detection-rules</guid>
+      <pubDate>Tue, 07 Jul 2026 12:00:00 +0000</pubDate>
+      <description>A lottery-prediction backtester repointed at Sigma rules, and two findings from real public data — one classic, one AI.</description>
+      <content:encoded><![CDATA[<h2>The premise</h2>
+      <p>Detection engineers write rules — Sigma, KQL analytics, the newer <a href="https://github.com/Agent-Threat-Rule/agent-threat-rules">Agent Threat Rules</a> for AI agents — but the feedback loop is weak. You ship a rule and find out how good it was from production noise, weeks later. The question you actually want answered before shipping is simple: <em>against my historical data, how many real attacks does this rule catch, and how much noise does it make?</em></p>
+      <p>That is a backtest. And the machinery for it is the same machinery you'd build to backtest a market strategy, or — in my case — a lottery predictor.</p>
+      <p>Yes, I once built a system to predict lottery numbers. No, it doesn't work, and I know that precisely because I made the harness prove it: every model run against a pure-random baseline over ten thousand simulations, with a chi-square test to catch any edge over chance. None of them had one. That could have been the end of the project. Instead it was the useful part: the harness around those useless models was solid. Replay history, score each predictor, rank them, weight an ensemble, track drift, all of it spent on a coin flip.</p>
+      <p>So I lifted the harness out, threw away the models, and rewrote the scoring core as a confusion matrix. The result is the <a href="https://github.com/wislest/detection-rule-backtester">Detection Rule Backtester</a>.</p>
+      <p>A rule becomes a binary classifier over events:</p>
+      <pre><code>predicted positive := the rule fired on the event
+actual positive    := the event is part of an attack (ground-truth label)</code></pre>
+      <p>From there you get precision, recall, F1 and false-positive rate per rule, rankings, and a multi-rule ensemble confidence. Two tracks share one harness: classic logs (Sysmon/EVTX) and AI-attack traces (LLM prompts, agent tool calls).</p>
+      <p>Below are two findings from running it on real public data — one from each track — because a harness is only interesting if it tells you something you didn't already know.</p>
+
+      <h2>Finding 1 (classic logs): a rule can be right and still blind</h2>
+      <p>I ran two Sigma rules against a real <a href="https://github.com/OTRF/Security-Datasets">OTRF Security-Datasets</a> capture — an Empire launcher that uses <code>regsvr32</code> to pull a remote <code>.sct</code> scriptlet (Squiblydoo, <code>T1218.010</code>) which spawns an encoded-PowerShell agent (<code>T1059.001</code>) beaconing to a C2. 2,390 events.</p>
+      <p>Since these captures don't ship per-event labels, I anchored ground truth on the attack's IOCs — the C2 address and the <code>regsvr32 → powershell</code> process lineage — deliberately <em>independent</em> of the process patterns the rules test, to avoid grading the rules on their own answer key.</p>
+      <p>Both rules fired at precision 1.0, which looked fine until I checked the Squiblydoo rule's recall: 0.5. It had caught the attack once and missed it once, and that stopped me for a minute, because there was only one attack to catch.</p>
+      <p>The answer was that the same process creation gets logged twice — once by Sysmon (EventID 1) and once by Windows Security (EventID 4688). The rule keys on <code>Image</code>, a Sysmon field name; the 4688 record carries the identical data under <code>NewProcessName</code>. Same event, different schema, and a rule written against one schema is blind to the other.</p>
+      <p>The fix is not cleverer regex — it's <strong>field normalization</strong>, the same idea as Sigma processing pipelines or the OSSEM data dictionary. Map the Security field names onto the Sysmon names before evaluating:</p>
+      <pre><code>events = load_sysmon_events(capture, normalize=True)   # 4688 gains Image/ParentImage</code></pre>
+      <p>Scoped recall goes from 0.5 to 1.0. The harness printed both runs side by side, and that is what I wanted from it: not just a score, but a hint at where the rule was losing ground, and a way to confirm the fix actually moved the number.</p>
+
+      <h2>Finding 2 (AI attacks): keyword rules barely dent real jailbreaks</h2>
+      <p>For AI attacks I replayed 666 <a href="https://github.com/NVIDIA/garak">in-the-wild jailbreak prompts</a> shipped with NVIDIA's garak, plus a few named DAN / Developer-Mode payloads, mixed with benign prompts so precision and false-positive rate mean something.</p>
+      <p>A classic prompt-injection rule keyed on instruction-override phrasing — <em>"ignore previous instructions", "developer mode", "reveal your system prompt"</em> — caught <strong>8.8% (59/669)</strong>, at precision 1.0.</p>
+      <p>The low number is the interesting part. When I counted markers across the corpus, literal override phrasing turned out to be rare: "ignore/disregard previous" appears in 6.5% of prompts, "developer mode" in 3.6%. Real jailbreaks are dominated by <em>role-play framing</em> — "you are now", "act as", "pretend to be" — at 42.6%, and <em>restriction-removal</em> framing — "no restrictions", "unfiltered" — at 33.2%.</p>
+      <p>So I added three more rule families for exactly those patterns and let the harness rank them and vote. <strong>Ensemble recall rose to <span class="kpi">70.4% (471/669)</span></strong>, still with zero false alarms on the benign set. The ranking the harness produced:</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th class="num">Rank</th><th>Rule family</th><th class="num">Ensemble weight</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>Role-play / persona framing</td><td class="num">0.40</td></tr>
+          <tr><td class="num">2</td><td>Restriction-removal framing</td><td class="num">0.30</td></tr>
+          <tr><td class="num">3</td><td>DAN persona</td><td class="num">0.20</td></tr>
+          <tr><td class="num">4</td><td>Instruction-override keywords</td><td class="num">0.10</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>The override-keyword rule, the one most people reach for first, ranks last. And even all four families together leave about 30% of real jailbreaks uncaught. That residual is the honest argument for semantic detection: keyword and regex rules are a cheap first layer with a hard ceiling, and now I can point to where the ceiling sits instead of just asserting there is one.</p>
+
+      <h2>Why this shape matters</h2>
+      <p>Neither finding is exotic. What's useful is that both came out of the <em>same</em> measurement loop, and the loop is honest about its own limits: the Sigma evaluator ignores <code>logsource</code> (so pre-filter by source), scoped recall depends on rule and corpus taxonomies agreeing, and IOC-based labels are approximate. Those caveats are in the README, not hidden, because a backtester that flatters your rules is worse than none.</p>
+      <p>The through-line from a dead lottery project turned out to be simple: the value was never in the models, it was in the harness that measured them. Repointed at detection rules, classic and AI-facing alike, it finally has something worth measuring.</p>
+
+      <hr>
+      <p class="footnote">Code, rules and reproducible runs: <a href="https://github.com/wislest/detection-rule-backtester">github.com/wislest/detection-rule-backtester</a>. Every number above regenerates from <code>examples/run_real_dataset.py</code> and <code>examples/run_real_garak.py</code> after <code>bash scripts/fetch_datasets.sh</code>.</p>]]></content:encoded>
+    </item>
+  </channel>
+</rss>
