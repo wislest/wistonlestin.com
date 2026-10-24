@@ -34,6 +34,12 @@ def read_post(path: str):
     m = re.search(r'name="description"\s+content="(.*?)"', flat)
     desc = html.unescape(m.group(1)).strip() if m else ""
 
+    m = re.search(r'name="tags"\s+content="(.*?)"', flat)
+    raw_tags = m.group(1) if m else ""
+    # DEV : alphanumérique minuscule, 20 caractères max, 4 étiquettes max
+    tags = [re.sub(r"[^a-z0-9]", "", t.strip().lower())[:20] for t in raw_tags.split(",")]
+    tags = [t for t in tags if t][:4]
+
     m = re.search(r'<p class="meta mono">\s*(\d{4})-(\d{2})-(\d{2})', flat)
     if not (title and m):
         return None
@@ -52,6 +58,7 @@ def read_post(path: str):
         "date": date,
         "url": f"{SITE}/posts/{slug}",   # URL canonique, sans extension
         "body": body,
+        "tags": tags,
     }
 
 def main():
@@ -65,6 +72,7 @@ def main():
       <link>{p['url']}</link>
       <guid isPermaLink="true">{p['url']}</guid>
       <pubDate>{format_datetime(p['date'])}</pubDate>
+{chr(10).join(f"      <category>{t}</category>" for t in p['tags'])}
       <description>{html.escape(p['desc'])}</description>
       <content:encoded><![CDATA[{p['body']}]]></content:encoded>
     </item>""")

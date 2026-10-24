@@ -12,6 +12,10 @@
       <link>https://wistonlestin.com/posts/certificates-100-days-march-2027</link>
       <guid isPermaLink="true">https://wistonlestin.com/posts/certificates-100-days-march-2027</guid>
       <pubDate>Sat, 24 Oct 2026 12:00:00 +0000</pubDate>
+      <category>security</category>
+      <category>devops</category>
+      <category>sysadmin</category>
+      <category>ssl</category>
       <description>The CA/Browser Forum schedule is fixed: 100-day maximum certificate lifetime from 15 March 2027. The failure mode isn&#x27;t your main domain — it&#x27;s the certificate whose owner left the company.</description>
       <content:encoded><![CDATA[<h2>The schedule</h2>
       <p>In April 2025 the CA/Browser Forum passed ballot SC-081v3, which sets a staged reduction in how long a publicly trusted TLS certificate may live. It is not a proposal and it is not vendor marketing: it sits in the TLS Baseline Requirements, section 6.3.2, with dates attached.</p>
@@ -64,6 +68,9 @@
       <link>https://wistonlestin.com/posts/lab-metrics-red-flag</link>
       <guid isPermaLink="true">https://wistonlestin.com/posts/lab-metrics-red-flag</guid>
       <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+      <category>security</category>
+      <category>ai</category>
+      <category>machinelearning</category>
       <description>A weekend detection lab with perfect metrics on every row — and why the most honest number on the dashboard was a 0.0%.</description>
       <content:encoded><![CDATA[<h2>The setup</h2>
       <p>Last weekend I built a small multi-domain detection lab: network flows, phishing URLs, identity anomalies, malware memory metadata, and LLM prompt abuse. Same origin story as the <a href="https://wistonlestin.com/posts/backtesting-detection-rules.html">detection rule backtester</a> — scaffolding recycled from a dead lottery-prediction project — but this time pointed at the other half of the problem: not measuring rules, but running a scoring pipeline end to end. Events come in, models score them, anything above a 0.55 risk threshold opens an alert. A mini-SOC in a box, labelled LAB/DEMO on every page.</p>
@@ -100,6 +107,9 @@
       <link>https://wistonlestin.com/posts/backtesting-detection-rules</link>
       <guid isPermaLink="true">https://wistonlestin.com/posts/backtesting-detection-rules</guid>
       <pubDate>Tue, 07 Jul 2026 12:00:00 +0000</pubDate>
+      <category>security</category>
+      <category>ai</category>
+      <category>python</category>
       <description>A lottery-prediction backtester repointed at Sigma rules, and two findings from real public data — one classic, one AI.</description>
       <content:encoded><![CDATA[<h2>The premise</h2>
       <p>Detection engineers write rules — Sigma, KQL analytics, the newer <a href="https://github.com/Agent-Threat-Rule/agent-threat-rules">Agent Threat Rules</a> for AI agents — but the feedback loop is weak. You ship a rule and find out how good it was from production noise, weeks later. The question you actually want answered before shipping is simple: <em>against my historical data, how many real attacks does this rule catch, and how much noise does it make?</em></p>

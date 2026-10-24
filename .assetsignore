@@ -1,3 +1,8 @@
+# ATTENTION : ce fichier n'est PAS appliqué par le déploiement actuel.
+# .assetsignore n'est lu que par `wrangler deploy`; ce site se déploie par
+# l'integration git du tableau de bord Cloudflare, qui l'ignore. Verifie :
+#   curl -s https://wistonlestin.com/README.md | head -1   -> sert le fichier
+# La seule exclusion fiable ici est l'absence du fichier dans le depot.
 # Infra files — versioned in git but never served as site assets
 README.md
 wrangler.jsonc
@@ -7,5 +12,4 @@ deploy-blog-tunnel.sh
 deploy-wistonlestin-tunnel.sh
 .gitignore
 DESIGN.md
-syndication/**
 tools/**
