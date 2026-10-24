@@ -16,6 +16,7 @@
       <category>devops</category>
       <category>sysadmin</category>
       <category>ssl</category>
+      <enclosure url="https://wistonlestin.com/covers/certificates-100-days-march-2027.png" length="34815" type="image/png"/>
       <description>The CA/Browser Forum schedule is fixed: 100-day maximum certificate lifetime from 15 March 2027. The failure mode isn&#x27;t your main domain — it&#x27;s the certificate whose owner left the company.</description>
       <content:encoded><![CDATA[<h2>The schedule</h2>
       <p>In April 2025 the CA/Browser Forum passed ballot SC-081v3, which sets a staged reduction in how long a publicly trusted TLS certificate may live. It is not a proposal and it is not vendor marketing: it sits in the TLS Baseline Requirements, section 6.3.2, with dates attached.</p>

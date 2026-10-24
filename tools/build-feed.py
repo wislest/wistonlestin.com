@@ -34,6 +34,9 @@ def read_post(path: str):
     m = re.search(r'name="description"\s+content="(.*?)"', flat)
     desc = html.unescape(m.group(1)).strip() if m else ""
 
+    m = re.search(r'property="og:image"\s+content="(.*?)"', flat)
+    cover = m.group(1) if m else ""
+
     m = re.search(r'name="tags"\s+content="(.*?)"', flat)
     raw_tags = m.group(1) if m else ""
     # DEV : alphanumérique minuscule, 20 caractères max, 4 étiquettes max
@@ -59,7 +62,16 @@ def read_post(path: str):
         "url": f"{SITE}/posts/{slug}",   # URL canonique, sans extension
         "body": body,
         "tags": tags,
+        "cover": cover,
     }
+
+def enclosure(p):
+    """DEV utilise <enclosure> comme image de couverture à l'import."""
+    if not p["cover"]:
+        return ""
+    local = os.path.join(ROOT, p["cover"].split("wistonlestin.com/", 1)[-1])
+    size = os.path.getsize(local) if os.path.exists(local) else 0
+    return f'\n      <enclosure url="{p["cover"]}" length="{size}" type="image/png"/>'
 
 def main():
     posts = [p for p in (read_post(f) for f in glob.glob(os.path.join(ROOT, "posts", "*.html"))) if p]
@@ -72,7 +84,7 @@ def main():
       <link>{p['url']}</link>
       <guid isPermaLink="true">{p['url']}</guid>
       <pubDate>{format_datetime(p['date'])}</pubDate>
-{chr(10).join(f"      <category>{t}</category>" for t in p['tags'])}
+{chr(10).join(f"      <category>{t}</category>" for t in p['tags'])}{enclosure(p)}
       <description>{html.escape(p['desc'])}</description>
       <content:encoded><![CDATA[{p['body']}]]></content:encoded>
     </item>""")
