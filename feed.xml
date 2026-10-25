@@ -72,6 +72,7 @@
       <category>security</category>
       <category>ai</category>
       <category>machinelearning</category>
+      <enclosure url="https://wistonlestin.com/covers/lab-metrics-red-flag.png" length="36238" type="image/png"/>
       <description>A weekend detection lab with perfect metrics on every row — and why the most honest number on the dashboard was a 0.0%.</description>
       <content:encoded><![CDATA[<h2>The setup</h2>
       <p>Last weekend I built a small multi-domain detection lab: network flows, phishing URLs, identity anomalies, malware memory metadata, and LLM prompt abuse. Same origin story as the <a href="https://wistonlestin.com/posts/backtesting-detection-rules.html">detection rule backtester</a> — scaffolding recycled from a dead lottery-prediction project — but this time pointed at the other half of the problem: not measuring rules, but running a scoring pipeline end to end. Events come in, models score them, anything above a 0.55 risk threshold opens an alert. A mini-SOC in a box, labelled LAB/DEMO on every page.</p>
